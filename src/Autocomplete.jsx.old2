@@ -1,0 +1,119 @@
+import { useAuth } from "./AuthContext";
+import { useState, useEffect, useRef } from "react";
+import axios from "axios";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
+
+function Autocomplete() {
+  //const { user } = useAuth();
+  const auth = useAuth();
+  const [input, setInput] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const debounceTimeout = useRef(null);
+
+  // API endpoint (replace with your FastAPI server URL)
+  const API_URL = "http://localhost:8000/predict";
+
+
+
+  // Fetch predictions with debounce
+  useEffect(() => {
+    if (!auth.user) return;
+    if (!input.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    // Debounce API call (300ms delay)
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+
+    debounceTimeout.current = setTimeout(async () => {
+      try {
+        const response = await axios.post(API_URL, {
+          text: input,
+          top_k: 3,
+        });
+        setSuggestions(response.data.predictions);
+      } catch (err) {
+        setError("Failed to fetch suggestions");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }, 300);
+
+    return () => {
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+    };
+  }, [input, auth.user]);
+
+  // Handle loading state
+  if (auth.loading) {
+    return <div>Loading authentication...</div>;
+  }
+
+  // Check for user after we know loading is complete
+  if (!auth.user) {
+    return <div>Please log in to use autocomplete</div>;
+  }
+
+  return (
+    <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
+      <h1 className="text-2xl font-bold mb-4 text-gray-800">Smart Autocomplete</h1>
+      
+      <div className="relative">
+        <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Start typing..."
+          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          rows={4}
+        />
+        
+        {/* Loading indicator */}
+        {isLoading && (
+          <div className="absolute right-3 top-3">
+            <ArrowPathIcon className="h-5 w-5 animate-spin text-gray-500" />
+          </div>
+        )}
+      </div>
+
+      {/* Error message */}
+      {error && (
+        <p className="mt-2 text-red-500">{error}</p>
+      )}
+
+      {/* Suggestions */}
+      {suggestions.length > 0 && (
+        <div className="mt-4 space-y-2">
+          <h3 className="font-medium text-gray-700">Suggestions:</h3>
+          <ul className="space-y-1">
+            {suggestions.map(([word, confidence], index) => (
+              <li
+                key={index}
+                className="p-2 bg-gray-100 hover:bg-blue-50 rounded cursor-pointer"
+                onClick={() => setInput(`${input} ${word}`)}
+              >
+                <span className="font-medium">{word}</span>
+                <span className="ml-2 text-sm text-gray-500">
+                  ({(confidence * 100).toFixed(1)}%)
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Autocomplete;
+

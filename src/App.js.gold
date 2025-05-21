@@ -1,0 +1,19 @@
+import { useAuth } from './AuthContext';
+import Autocomplete from './Autocomplete';
+
+function App() {
+  const { user, login } = useAuth();
+
+  return (
+    <div>
+      {!user ? (
+        <button onClick={() => login('test', 'pass')}>Log In</button>
+      ) : (
+        <Autocomplete />
+      )}
+    </div>
+  );
+}
+
+export default App;
+

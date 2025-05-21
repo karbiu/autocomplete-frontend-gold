@@ -1,0 +1,12 @@
+import Autocomplete from "./Autocomplete";
+
+function App() {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Autocomplete />
+    </div>
+  );
+}
+
+export default App;
+
