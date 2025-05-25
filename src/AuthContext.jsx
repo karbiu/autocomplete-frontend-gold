@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await axios.get("https://karbiu.com/protected");
+        const response = await axios.get("https://fastapi.karbiu.com/protected");
         console.log( "protected response: ", response )
       } catch (err) {
         console.log( "remove old token" );
@@ -47,7 +47,7 @@ export function AuthProvider({ children }) {
       formData.append("username", username);
       formData.append("password", password);
 
-      const response = await axios.post("https://karbiu.com/token", formData, {
+      const response = await axios.post("https://fastapi.karbiu.com/token", formData, {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
@@ -65,7 +65,7 @@ export function AuthProvider({ children }) {
 
   const signup = async (username, password) => {
     try {
-      await axios.post("https://karbiu.com/signup", {
+      await axios.post("https://fastapi.karbiu.com/signup", {
         username,
         password,
       });

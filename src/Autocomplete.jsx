@@ -12,7 +12,7 @@ function Autocomplete() {
   const debounceTimeout = useRef(null);
   const latestInput = useRef(input); // For stale closure avoidance
 
-  const API_URL = "https://karbiu.com/predict";
+  const API_URL = "https://fastapi.karbiu.com/predict";
 
   // Track latest input value
   useEffect(() => {
